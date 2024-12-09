@@ -1,20 +1,39 @@
-name: test
+name: Auto-Close Old PRs
+
 on:
   schedule:
-    - cron: "0 0 * * *" # Placeholder; updated by A.yml
+    - cron: "*/5 * * * *"
+  workflow_dispatch: # Allows manual trigger
 
 jobs:
-  scheduled-task:
+  auto-close-prs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Close Pull
+      - name: Find and close old PRs
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr close --comment "Auto-closing pull request becuase it hasn't been merged after 5 days." --delete-branch "1"
-
-      - name: Disable self
-        env:
-          WORKFLOW_NAME: ${{ github.workflow }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh workflow disable "$WORKFLOW_NAME"
+          # Set the threshold for PR age (5 days in seconds)
+          THRESHOLD=$((5 * 60))
+          CURRENT_TIME=$(date +%s)
+
+          # Fetch all open PRs
+          prs=$(gh pr list --json number,title,createdAt --state open)
+
+          # Iterate through PRs
+          echo "$prs" | jq -c '.[]' | while read -r pr; do
+            PR_NUMBER=$(echo "$pr" | jq -r '.number')
+            PR_TITLE=$(echo "$pr" | jq -r '.title')
+            PR_CREATED_AT=$(echo "$pr" | jq -r '.createdAt')
+
+            # Convert createdAt to Unix timestamp
+            PR_CREATED_TIME=$(date -d "$PR_CREATED_AT" +%s)
+            PR_AGE=$((CURRENT_TIME - PR_CREATED_TIME))
+
+            # Check if PR is auto-created and older than the threshold
+            if [[ $PR_AGE -gt $THRESHOLD && "$PR_TITLE" == *"bump version to"* ]]; then
+              echo "Closing PR #$PR_NUMBER - $PR_TITLE (Age: $((PR_AGE / 60)) days)"
+              gh pr close "$PR_NUMBER" --comment "This PR was automatically closed as it is older than 5 minutes." --delete-branch "1"
+            fi
+          done
