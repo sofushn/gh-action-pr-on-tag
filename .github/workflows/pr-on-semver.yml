@@ -27,3 +27,4 @@ jobs:
 
             This PR is done for the `${{ matrix.env }}` environment.
           branch: "bump-version-${{ github.ref }}"
+          base: main
