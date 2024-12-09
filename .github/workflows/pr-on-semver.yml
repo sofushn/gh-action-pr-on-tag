@@ -19,7 +19,6 @@ jobs:
       - uses: peter-evans/create-pull-request@v7.0.5
         name: Create Pull Request
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Bump version to ${{ github.ref }}"
           title: "${{ matrix.env }} - bump version to ${{ github.ref }}"
           body: |
@@ -27,7 +26,3 @@ jobs:
 
             This PR is done for the `${{ matrix.env }}` environment.
           branch: "bump-version-${{ github.ref }}"
-          base: "main"
-          draft: false
-
-
