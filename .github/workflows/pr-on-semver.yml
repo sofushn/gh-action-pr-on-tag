@@ -6,7 +6,7 @@ on:
         - 'v?[0-9]+.[0-9]+.[0-9]'
 
 jobs:
-  pr:
+  auto-pull-request:
     strategy:
       matrix:
         env:
@@ -27,4 +27,28 @@ jobs:
 
             This PR is done for the `${{ matrix.env }}` environment.
           branch: "bump-version-${{ github.ref }}"
-          base: ${{ matrix.env }}
+          base: main
+  enable-auto-delete:
+    needs: auto-pull-request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Calculate required time for B
+        id: calc-time
+        run: |
+          # Calculate the required time (e.g., 5 minutes from now)
+          NEXT_RUN_TIME=$(date -u -d "+5 minutes" +"%M %H * * *")
+          echo "next_run_time=$NEXT_RUN_TIME" >> $GITHUB_ENV
+
+      - name: Update clear-semver-pr.yml cron schedule
+        run: |
+          # Use yq to update the cron value in B.yml
+          yq eval ".on.schedule[0].cron = env(next_run_time)" -i .github/workflows/clear-semver-pr.yml
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .github/workflows/clear-semver-pr.yml
+          git commit -m "Update clear-semver-pr.yml cron schedule"
+          git push
+
+      - name: Enable B workflow
+        run: gh workflow enable clear-semver-pr.yml

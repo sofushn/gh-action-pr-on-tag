@@ -1,0 +1,20 @@
+name: test
+on:
+  schedule:
+    - cron: "0 0 * * *" # Placeholder; updated by A.yml
+
+jobs:
+  scheduled-task:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Close Pull
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr close --comment "Auto-closing pull request becuase it hasn't been merged after 5 days." --delete-branch "1"
+
+      - name: Disable self
+        env:
+          WORKFLOW_NAME: ${{ github.workflow }}
+        run: |
+          gh workflow disable "$WORKFLOW_NAME"
