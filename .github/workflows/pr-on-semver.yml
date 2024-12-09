@@ -1,0 +1,32 @@
+name: Pull Request on SemVer tag
+on: 
+  push:
+    # SemVer tags pattern (https://regex101.com/r/vkijKf/1/) with optional v prefix
+    tags: ['^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$']
+
+jobs:
+  pr:
+    strategy:
+      matrix:
+        env:
+          - prod
+          - preprod
+          - test
+          - dev
+    runs-on: ubuntu-latest
+    steps:          
+      - uses: peter-evans/create-pull-request@v7.0.5
+        name: Create Pull Request
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Bump version to ${{ github.ref }}"
+          title: "${{ matrix.env }} - bump version to ${{ github.ref }}"
+          body: |
+            This PR was created automatically in response to a new SemVer tag. The version has been bumped to ${{ github.ref }}.
+
+            This PR is done for the `${{ matrix.env }}` environment.
+          branch: "bump-version-${{ github.ref }}"
+          base: "main"
+          draft: false
+
+
