@@ -35,6 +35,6 @@ jobs:
             # Check if PR is auto-created and older than the threshold
             if [[ $PR_AGE -gt $THRESHOLD && "$PR_TITLE" == *"bump version to"* ]]; then
               echo "Closing PR #$PR_NUMBER - $PR_TITLE (Age: $((PR_AGE / 60)) minutes)"
-              gh pr close "$PR_NUMBER" --comment "This PR was automatically closed as it is older than 5 minutes." --delete-branch "1"
+              gh pr close "$PR_NUMBER" --comment "This PR was automatically closed as it is older than 5 minutes." --delete-branch
             fi
           done
