@@ -1,0 +1,5 @@
+values:
+  someKey: someValue
+  image:
+    repository: someRepo
+    tag: someTag
