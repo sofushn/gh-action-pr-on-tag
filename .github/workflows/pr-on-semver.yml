@@ -16,7 +16,7 @@ jobs:
           - 'nl'
           - 'no'
           - 'se'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Update values.yaml
@@ -24,7 +24,8 @@ jobs:
           VERSION="${{ github.ref_name }}"
           PATH="./argocd/production/company/${{ matrix.env }}/values.yaml"
 
-          sudo apt-get install yq -y
+          sudo apt update
+          sudo apt install yq -y
 
           # Find and update all image tags in values.yaml
           if [ -f "$PATH" ]; then
