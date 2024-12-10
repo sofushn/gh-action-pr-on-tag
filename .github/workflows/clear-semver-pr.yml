@@ -14,8 +14,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Set the threshold for PR age (5 days in seconds)
-          THRESHOLD=$((5 * 60))
+          # Set the threshold for PR age (3 days in seconds)
+          THRESHOLD=$((5 * 60)) # 3 * 24 * 60 * 60
           CURRENT_TIME=$(date +%s)
 
           # Fetch all open PRs
@@ -33,7 +33,7 @@ jobs:
 
             # Check if PR is auto-created and older than the threshold
             if [[ $PR_AGE -gt $THRESHOLD && "$PR_TITLE" == *"bump version to"* ]]; then
-              echo "Closing PR #$PR_NUMBER - $PR_TITLE (Age: $((PR_AGE / 60)) days)"
+              echo "Closing PR #$PR_NUMBER - $PR_TITLE (Age: $((PR_AGE / 60)) minutes)"
               gh pr close "$PR_NUMBER" --comment "This PR was automatically closed as it is older than 5 minutes." --delete-branch "1"
             fi
           done
