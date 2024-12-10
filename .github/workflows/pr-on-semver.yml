@@ -24,6 +24,8 @@ jobs:
           VERSION="${{ github.ref_name }}"
           PATH="./argocd/production/company/${{ matrix.env }}/values.yaml"
 
+          apt install yq -y
+
           # Find and update all image tags in values.yaml
           if [ -f "$PATH" ]; then
             yq -i '.values.image.tag = strenv(VERSION)' "$PATH"
