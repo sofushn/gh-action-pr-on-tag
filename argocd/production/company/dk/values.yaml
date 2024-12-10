@@ -2,4 +2,4 @@ values:
   someKey: someValue
   image:
     repository: someRepo
-    tag: someTag
+    tag: v0.0.3
