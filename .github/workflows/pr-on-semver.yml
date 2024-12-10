@@ -2,29 +2,40 @@ name: Pull Request on SemVer tag
 on: 
   push:
     tags:
-        - 'v?[0-9]+.[0-9]+.[0-9]+-[a-zA-Z]*'
-        - 'v?[0-9]+.[0-9]+.[0-9]'
+        - 'v[0-9]+.[0-9]+.[0-9]+-[a-zA-Z]*'
+        - 'v[0-9]+.[0-9]+.[0-9]'
 
 jobs:
   auto-pull-request:
     strategy:
       matrix:
         env:
-          - prod
-          - preprod
-          - test
-          - dev
+          - 'dk'
+          - 'fi'
+          - 'gb'
+          - 'nl'
+          - 'no'
+          - 'se'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Update values.yaml
+        run: |
+          VERSION="${{ github.ref_name }}"
+          PATH = "./argocd/production/company/${{ matrix.env }}/values.yaml"
+
+          # Find and update all image tags in values.yaml
+          if [ -f "$PATH" ]; then
+            yq -i '.values.image.tag = strenv(VERSION)' "$PATH"
+          fi
       - uses: peter-evans/create-pull-request@v7
         name: Create Pull Request
         with:
-          commit-message: "Bump version to ${{ github.ref }}"
+          commit-message: "ci(${{ matrix.env }}): bump version to ${{ github.ref }}"
           title: "${{ matrix.env }} - bump version to ${{ github.ref }}"
           body: |
             This PR was created automatically in response to a new SemVer tag. The version has been bumped to ${{ github.ref }}.
 
             This PR is done for the `${{ matrix.env }}` environment.
-          branch: "bump-version-${{ github.ref }}"
+          branch: "bump-version-${{ github.ref }}-${{ matrix.env }}"
           base: main
