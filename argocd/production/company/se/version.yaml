@@ -1,4 +1,4 @@
 image_a: repo/image_a
-image_a_version: 0.0.1
+image_a_version: 0.1.7
 image_b: repo/image_b
-image_b_version: 0.0.1
+image_b_version: 0.1.7
